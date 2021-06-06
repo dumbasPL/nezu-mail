@@ -1,0 +1,33 @@
+version: '3'
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "nezumail"
+      MYSQL_DATABASE: "nezumail"
+      MYSQL_USER: "nezumail"
+      MYSQL_PASSWORD: "nezumail"
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+  web:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "2525:2525"
+      - "3337:3000"
+    restart: always
+    environment:
+      SMTP_PORT: 2525
+      HTTP_PORT: 3000
+      MYSQL_HOST: "db"
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: "nezumail"
+      MYSQL_USER: "nezumail"
+      MYSQL_PASSWORD: "nezumail"
+      ADMIN_USER: "nezumail"
+      ADMIN_PASSWORD: "nezumail"
+volumes:
+  db_data:
