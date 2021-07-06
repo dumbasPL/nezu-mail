@@ -12,6 +12,7 @@ import {AccessToken} from './entity/AccessToken';
 import {mailEvent, mailRouter} from './controller/MailController';
 import * as path from 'path';
 import {authenticate} from 'passport';
+import {Domain} from './entity/Domain';
 import {AccessTokenRouter} from './controller/AccessTokenController';
 
 dotenv.config();
@@ -68,6 +69,7 @@ createConnection({
 
   app.use('/api/mail', mailRouter);
   app.use('/api/token', AccessTokenRouter);
+  app.use('/api/domain', DomainRouter);
 
   app.use('/api/*', (req, res, next) => res.sendStatus(404));
 
@@ -98,9 +100,14 @@ createConnection({
           }
           mail.subject = parsed.subject ?? '';
           mail.body = parsed.html || parsed.text || '';
-          mail = await mail.save();
-          console.log(`New Mail: ${mail.sender} -> ${mail.inbox}: ${mail.subject}`);
-          mailEvent.emitNewMail(mail);
+
+          const domain = mail.inbox.substring(mail.inbox.lastIndexOf('@') + 1);
+          if (await Domain.findOne({domain})) {
+            mail = await mail.save();
+            console.log(`New Mail: ${mail.sender} -> ${mail.inbox}: ${mail.subject}`);
+          } else {
+            console.log(`domain ${domain} not in whitelist`);
+          }
         } catch (e) {
           console.log(e);
         }

@@ -18,6 +18,9 @@ export default function Header() {
           <LinkContainer to='/tokens'>
             <Nav.Link>API Tokens</Nav.Link>
           </LinkContainer>
+          <LinkContainer to='/domains'>
+            <Nav.Link>Domains</Nav.Link>
+          </LinkContainer>
         </Nav>
       </Container>
     </Navbar>
