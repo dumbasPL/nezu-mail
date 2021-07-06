@@ -1,10 +1,10 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
+import {BaseEntity, Column, Entity, PrimaryColumn} from 'typeorm';
 
 @Entity()
 export class AccessToken extends BaseEntity {
 
   @PrimaryColumn({
-    length: 32
+    length: 32,
   })
   token: string;
 

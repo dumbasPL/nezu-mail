@@ -1,18 +1,18 @@
-import * as dotenv from "dotenv";
-import "reflect-metadata";
-import { createConnection } from "typeorm";
-import * as express from "express";
-import { SMTPServer } from "smtp-server";
-import { simpleParser } from "mailparser";
-import * as passport from "passport";
-import { Strategy as BearerStrategy } from "passport-http-bearer"
-import { BasicStrategy } from "passport-http"
-import { Mail } from "./entity/Mail";
-import { AccessToken } from "./entity/AccessToken";
-import { mailEvent, mailRouter } from "./controller/MailController";
-import * as path from "path";
-import { authenticate } from "passport";
-import { AccessTokenRouter } from "./controller/AccessTokenController";
+import * as dotenv from 'dotenv';
+import 'reflect-metadata';
+import {createConnection} from 'typeorm';
+import * as express from 'express';
+import {SMTPServer} from 'smtp-server';
+import {simpleParser} from 'mailparser';
+import * as passport from 'passport';
+import {Strategy as BearerStrategy} from 'passport-http-bearer';
+import {BasicStrategy} from 'passport-http';
+import {Mail} from './entity/Mail';
+import {AccessToken} from './entity/AccessToken';
+import {mailEvent, mailRouter} from './controller/MailController';
+import * as path from 'path';
+import {authenticate} from 'passport';
+import {AccessTokenRouter} from './controller/AccessTokenController';
 
 dotenv.config();
 
@@ -32,12 +32,12 @@ passport.use(
 
 passport.use(
   new BearerStrategy((token, done) => {
-    AccessToken.findOne(token).then(t => {
+    AccessToken.findOne(token).then((t) => {
       done(null, t ?? false);
-    }).catch(e => {
+    }).catch((e) => {
       done(e.message);
       console.log(e);
-    })
+    });
   })
 );
 
@@ -51,11 +51,10 @@ createConnection({
   synchronize: process.env.NODE_ENV == 'development',
   logging: false,
   charset: 'utf8mb4',
-  entities: [ "src/entity/**/*.ts" ],
-  migrations: [ "src/migration/**/*.ts" ],
-  subscribers: [ "src/subscriber/**/*.ts" ]
-}).then(async connection => {
-
+  entities: ['src/entity/**/*.ts'],
+  migrations: ['src/migration/**/*.ts'],
+  subscribers: ['src/subscriber/**/*.ts'],
+}).then(async (connection) => {
   if (process.env.NODE_ENV != 'development') {
     await connection.runMigrations();
   }
@@ -63,7 +62,7 @@ createConnection({
   const app = express();
 
   app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.urlencoded({extended: true}));
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -72,14 +71,14 @@ createConnection({
 
   app.use('/api/*', (req, res, next) => res.sendStatus(404));
 
-  app.use('/', authenticate('basic', { session: false }), express.static(path.join(__dirname, '..', 'front', 'build')));
+  app.use('/', authenticate('basic', {session: false}), express.static(path.join(__dirname, '..', 'front', 'build')));
 
-  app.get('*', authenticate('basic', { session: false }), (req, res) =>{
-    res.sendFile(path.join(__dirname, "..", 'front', 'build', 'index.html'));
+  app.get('*', authenticate('basic', {session: false}), (req, res) =>{
+    res.sendFile(path.join(__dirname, '..', 'front', 'build', 'index.html'));
   });
 
-  app.listen(process.env.HTTP_PORT || 3000, () => {
-    console.log(`Express server has started on port ${process.env.HTTP_PORT || 3000}`);
+  app.listen(process.env.HTTP_PORT ?? 3000, () => {
+    console.log(`Express server has started on port ${process.env.HTTP_PORT ?? 3000}`);
   });
 
   const smtpServer = new SMTPServer({
@@ -105,14 +104,13 @@ createConnection({
         } catch (e) {
           console.log(e);
         }
-      })
-      stream.on("end", callback);
+      });
+      stream.on('end', callback);
     },
     disabledCommands: ['AUTH'],
   });
 
   smtpServer.listen(process.env.SMTP_PORT || 25, () => {
     console.log(`SMTP server has started on port ${process.env.SMTP_PORT || 25}`);
-  })
-
-}).catch(error => console.log(error));
+  });
+}).catch((error) => console.log(error));

@@ -1,14 +1,13 @@
-import { Mail } from "../entity/Mail";
-import { authenticate } from "passport";
-import { Request, Router } from "express";
-import { EventEmitter } from "events";
-import { MailEvent } from "../MailEvent";
+import {Mail} from '../entity/Mail';
+import {authenticate} from 'passport';
+import {Request, Router} from 'express';
+import {MailEvent} from '../MailEvent';
 
 export const mailRouter = Router();
 
 export const mailEvent = new MailEvent();
 
-const auth_types = ['basic', 'bearer'];
+const authTypes = ['basic', 'bearer'];
 
 interface GetMailsQuery {
   skip?: number;
@@ -19,39 +18,39 @@ interface GetMailsQuery {
   search?: string;
 }
 
-mailRouter.get('/', authenticate(auth_types, { session: false }), async (req: Request<unknown, unknown, unknown, GetMailsQuery>, res) => {
+mailRouter.get('/', authenticate(authTypes, {session: false}), async (req: Request<unknown, unknown, unknown, GetMailsQuery>, res) => {
   try {
-    let query = Mail.createQueryBuilder('mail');
+    const query = Mail.createQueryBuilder('mail');
     query.select([
       'mail.id',
       'mail.sender',
       'mail.inbox',
       'mail.subject',
-      'mail.date'
+      'mail.date',
     ]);
 
     if (req.query.sender) {
-      query.andWhere('mail.sender = :sender', { sender: req.query.sender });
+      query.andWhere('mail.sender = :sender', {sender: req.query.sender});
     }
     if (req.query.inbox) {
-      query.andWhere('mail.inbox = :inbox', { inbox: req.query.inbox });
+      query.andWhere('mail.inbox = :inbox', {inbox: req.query.inbox});
     }
     if (req.query.subject) {
-      query.andWhere('mail.subject LIKE :q', { q: `%${req.query.subject.replace(/\*/g, '%')}%` });
+      query.andWhere('mail.subject LIKE :q', {q: `%${req.query.subject.replace(/\*/g, '%')}%`});
     }
     if (req.query.search) {
       const q = `%${req.query.search.replace(/\*/g, '%')}%`;
-      query.andWhere('mail.sender LIKE :s_search OR mail.inbox LIKE :i_search OR mail.subject LIKE :su_search', { s_search: q, i_search: q, su_search: q });
+      query.andWhere('mail.sender LIKE :s_search OR mail.inbox LIKE :i_search OR mail.subject LIKE :su_search', {s_search: q, i_search: q, su_search: q});
     }
     query.orderBy('mail.date', 'DESC');
-    query.skip(req.query.skip ?req.query.skip : 0)
+    query.skip(req.query.skip ? req.query.skip : 0);
     query.take(req.query.limit ? req.query.limit : 25);
     const mails = await query.getMany();
     const count = await query.getCount();
 
     res.status(200).send({
       data: mails,
-      total: count
+      total: count,
     });
   } catch (e) {
     res.status(500).send(e.message);
@@ -66,7 +65,7 @@ interface WaitForMailQuery {
   delete?: string;
 }
 
-mailRouter.get('/wait', authenticate(auth_types, { session: false }), (req: Request<unknown, unknown, unknown, WaitForMailQuery>, res) => {
+mailRouter.get('/wait', authenticate(authTypes, {session: false}), (req: Request<unknown, unknown, unknown, WaitForMailQuery>, res) => {
   const onMail = (mail: Mail) => {
     if (req.query.sender && req.query.sender != mail.sender) {
       return;
@@ -84,7 +83,7 @@ mailRouter.get('/wait', authenticate(auth_types, { session: false }), (req: Requ
         mail.remove();
       }
     } catch (_) { }
-  }
+  };
   mailEvent.on('newMail', onMail);
   setTimeout(() => {
     mailEvent.removeListener('newMail', onMail);
@@ -94,9 +93,9 @@ mailRouter.get('/wait', authenticate(auth_types, { session: false }), (req: Requ
   }, (req.query.timeout ?? 10) * 1000);
 });
 
-mailRouter.get('/:id', authenticate(auth_types, { session: false }), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
+mailRouter.get('/:id', authenticate(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
   try {
-    let mail = await Mail.findOne(req.params.id);
+    const mail = await Mail.findOne(req.params.id);
 
     if (mail) {
       if (req.accepts('html')) {
@@ -105,18 +104,18 @@ mailRouter.get('/:id', authenticate(auth_types, { session: false }), async (req:
         res.status(200).send(mail);
       }
     } else {
-      res.sendStatus(404)
+      res.sendStatus(404);
     }
   } catch (e) {
     res.status(500).send(e.message);
   }
 });
 
-mailRouter.delete('/:id', authenticate(auth_types, { session: false }), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
+mailRouter.delete('/:id', authenticate(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
   try {
-    let del_res = await Mail.delete(req.params.id);
+    const delRes = await Mail.delete(req.params.id);
 
-    res.sendStatus(del_res.affected != null && del_res.affected == 0 ? 404 : 200);
+    res.sendStatus(delRes.affected != null && delRes.affected == 0 ? 404 : 200);
   } catch (e) {
     res.status(500).send(e.message);
   }
