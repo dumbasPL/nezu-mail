@@ -20,7 +20,6 @@ services:
       PMA_PORT: 3306
       PMA_USER: "test"
       PMA_PASSWORD: "test"
-    restart: always
     ports:
       - 8183:80
 
