@@ -9,18 +9,17 @@ import {Strategy as BearerStrategy} from 'passport-http-bearer';
 import {BasicStrategy} from 'passport-http';
 import {Mail} from './entity/Mail';
 import {AccessToken} from './entity/AccessToken';
-import {mailEvent, mailRouter} from './controller/MailController';
 import * as path from 'path';
 import {authenticate} from 'passport';
 import {Domain} from './entity/Domain';
+import {mailEvent, mailRouter} from './controller/MailController';
 import {AccessTokenRouter} from './controller/AccessTokenController';
+import {DomainRouter} from './controller/DomainController';
 
 dotenv.config();
 
 passport.serializeUser((user, done) => done(null, user));
-
 passport.deserializeUser((user, done) => done(null, user));
-
 passport.use(
   new BasicStrategy((username, password, done) => {
     if (username != process.env.ADMIN_USER || password != process.env.ADMIN_PASSWORD) {
@@ -31,11 +30,12 @@ passport.use(
   })
 );
 
+// token auth
 passport.use(
   new BearerStrategy((token, done) => {
-    AccessToken.findOne(token).then((t) => {
+    AccessToken.findOne(token).then(t => {
       done(null, t ?? false);
-    }).catch((e) => {
+    }).catch(e => {
       done(e.message);
       console.log(e);
     });
@@ -55,7 +55,7 @@ createConnection({
   entities: ['src/entity/**/*.ts'],
   migrations: ['src/migration/**/*.ts'],
   subscribers: ['src/subscriber/**/*.ts'],
-}).then(async (connection) => {
+}).then(async connection => {
   if (process.env.NODE_ENV != 'development') {
     await connection.runMigrations();
   }
@@ -120,4 +120,4 @@ createConnection({
   smtpServer.listen(process.env.SMTP_PORT || 25, () => {
     console.log(`SMTP server has started on port ${process.env.SMTP_PORT || 25}`);
   });
-}).catch((error) => console.log(error));
+}).catch(error => console.log(error));
