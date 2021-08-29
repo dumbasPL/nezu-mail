@@ -84,8 +84,7 @@ export default class Mails extends Component<RouteComponentProps, IState> {
   goToPage(n: number) {
     this.setState({
       offset: n
-    });
-    this.sendRequest();
+    }, () => this.sendRequest());
   }
   
   search(q: string) {
