@@ -129,7 +129,7 @@ export default class Mails extends Component<RouteComponentProps, IState> {
         </Table>
         <Row className="justify-content-md-center">
           <Col xs="auto">
-            <Pagination current={this.state.offset} perPage={25} total={this.state.count ?? 0} onClick={(n) => this.goToPage(n)}/>
+            <Pagination current={this.state.offset} perPage={25} total={this.state.count ?? 0} onClick={(n) => this.goToPage(n)} delta={4}/>
           </Col>
         </Row>
       </Container>
