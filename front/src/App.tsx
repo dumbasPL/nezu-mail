@@ -6,6 +6,7 @@ import Mails from './Mails';
 import Mail from './Mail';
 import Tokens from './Tokens';
 import Domains from './Domains';
+import Actions from './Actions';
 
 export default class App extends Component {
   render() {
@@ -20,6 +21,7 @@ export default class App extends Component {
           <Route path="/mail/:id" component={Mail} />
           <Route path="/tokens" component={Tokens} />
           <Route path="/domains" component={Domains} />
+          <Route path="/actions" component={Actions} />
         </Switch>
       </Router>
     )

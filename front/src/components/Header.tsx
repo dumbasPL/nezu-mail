@@ -13,13 +13,16 @@ export default function Header() {
         </LinkContainer>
         <Nav>
           <LinkContainer to='/mails'>
-            <Nav.Link>Emails</Nav.Link>
+            <Nav.Link active={false}>Emails</Nav.Link>
           </LinkContainer>
           <LinkContainer to='/tokens'>
-            <Nav.Link>API Tokens</Nav.Link>
+            <Nav.Link active={false}>API Tokens</Nav.Link>
           </LinkContainer>
           <LinkContainer to='/domains'>
-            <Nav.Link>Domains</Nav.Link>
+            <Nav.Link active={false}>Domains</Nav.Link>
+          </LinkContainer>
+          <LinkContainer to='/actions'>
+            <Nav.Link active={false}>Actions</Nav.Link>
           </LinkContainer>
         </Nav>
       </Container>

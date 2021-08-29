@@ -11,13 +11,16 @@ import {Mail} from './entity/Mail';
 import {AccessToken} from './entity/AccessToken';
 import * as path from 'path';
 import {authenticate} from 'passport';
+import {ActionManager} from './ActionManager';
 import {Domain} from './entity/Domain';
 import {mailEvent, mailRouter} from './controller/MailController';
 import {AccessTokenRouter} from './controller/AccessTokenController';
 import {DomainRouter} from './controller/DomainController';
+import {ActionRouter} from './controller/ActionController';
 
 dotenv.config();
 
+// basic auth
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 passport.use(
@@ -60,6 +63,8 @@ createConnection({
     await connection.runMigrations();
   }
 
+  ActionManager.reload();
+
   const app = express();
 
   app.use(express.json());
@@ -70,6 +75,7 @@ createConnection({
   app.use('/api/mail', mailRouter);
   app.use('/api/token', AccessTokenRouter);
   app.use('/api/domain', DomainRouter);
+  app.use('/api/action', ActionRouter);
 
   app.use('/api/*', (req, res, next) => res.sendStatus(404));
 
@@ -105,6 +111,9 @@ createConnection({
           if (await Domain.findOne({domain})) {
             mail = await mail.save();
             console.log(`New Mail: ${mail.sender} -> ${mail.inbox}: ${mail.subject}`);
+            if (ActionManager.run(mail)) {
+              mailEvent.emitNewMail(mail);
+            }
           } else {
             console.log(`domain ${domain} not in whitelist`);
           }
