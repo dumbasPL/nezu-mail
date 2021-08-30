@@ -3,3 +3,4 @@ node_modules
 front/node_modules
 front/.env
 front/build
+Dockerfile

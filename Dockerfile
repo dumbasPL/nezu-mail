@@ -1,6 +1,6 @@
-FROM node:16-alpine
+FROM node:14-alpine as build
 
-WORKDIR /usr/src/app
+WORKDIR /builder
 
 COPY package*.json ./
 
@@ -10,8 +10,23 @@ RUN npm install && cd ./front && npm install
 
 COPY . .
 
-RUN cd ./front && npm run build
+RUN npm run build && cd ./front && npm run build
 
-EXPOSE 3000
+FROM node:14-alpine
 
-CMD [ "npm", "start" ]
+ENV NODE_ENV=production
+ENV HTTP_PORT=3000
+ENV SMTP_PORT=25
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci
+
+COPY --from=build /builder/build ./build
+COPY --from=build /builder/front/build ./front/build
+
+EXPOSE ${HTTP_PORT} ${SMTP_PORT}
+
+CMD [ "node", "build/index.js" ]
