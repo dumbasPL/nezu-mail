@@ -60,7 +60,7 @@ createConnection({
   migrations: [path.join(__dirname, 'migration', '**', '*.{ts,js}')],
 }).then(async connection => {
   if (process.env.NODE_ENV != 'development') {
-    await connection.runMigrations();
+    await connection.runMigrations({transaction: 'all'});
   }
 
   ActionManager.reload();
