@@ -6,6 +6,7 @@ import Pagination from './components/Pagination';
 import { Table, Container, Row, Col } from 'react-bootstrap'
 import { Link, RouteComponentProps } from 'react-router-dom'
 import moment from 'moment';
+import io, { Socket } from 'socket.io-client'
 
 export interface IMail {
   id: number;
@@ -19,10 +20,13 @@ export interface IMail {
 interface IState {
   offset: number;
   query?: string;
-  count?: number;
+  count: number;
   error?: string;
   emails: IMail[];
+  socket?: Socket;
+  perPage: number;
 }
+
 
 export default class Mails extends Component<RouteComponentProps, IState> {
 
@@ -33,7 +37,9 @@ export default class Mails extends Component<RouteComponentProps, IState> {
 
     this.state = {
       offset: 0,
-      emails: []
+      count: 0,
+      emails: [],
+      perPage: 25
     };
   }
 
@@ -52,7 +58,8 @@ export default class Mails extends Component<RouteComponentProps, IState> {
         skip: this.state.offset,
         search: this.state.query,
         sender: sender,
-        inbox: inbox
+        inbox: inbox,
+        limit: this.state.perPage
       },
       cancelToken: this.cancelSource.token
     }).then(res => {
@@ -73,12 +80,39 @@ export default class Mails extends Component<RouteComponentProps, IState> {
     })
   }
 
+  newMailHandler = (mail: IMail) => {
+    let { emails, count, perPage, offset } = this.state;
+    count++;
+    if (offset === 0) {
+      emails.unshift(mail);
+      if (emails.length > perPage) {
+        emails = emails.splice(0, perPage);
+      }
+      this.setState({
+        emails,
+        count
+      });
+    }
+    else {
+      offset++;
+      this.setState({
+        offset,
+        count
+      });
+    }
+  }
+
   componentDidMount() {
     this.sendRequest();
+    const socket = io('/');
+    socket.on('mail', this.newMailHandler);
+    this.setState({ socket });
   }
 
   componentWillUnmount() {
     this.cancelSource?.cancel();
+    this.state.socket?.off('mail', this.newMailHandler);
+    this.state.socket?.close();
   }
 
   goToPage(n: number) {
@@ -128,7 +162,7 @@ export default class Mails extends Component<RouteComponentProps, IState> {
         </Table>
         <Row className="justify-content-md-center">
           <Col xs="auto">
-            <Pagination current={this.state.offset} perPage={25} total={this.state.count ?? 0} onClick={(n) => this.goToPage(n)} delta={4}/>
+            <Pagination current={this.state.offset} perPage={this.state.perPage} total={this.state.count ?? 0} onClick={(n) => this.goToPage(n)} delta={4}/>
           </Col>
         </Row>
       </Container>

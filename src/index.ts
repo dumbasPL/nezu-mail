@@ -17,6 +17,8 @@ import {mailEvent, mailRouter} from './controller/MailController';
 import {AccessTokenRouter} from './controller/AccessTokenController';
 import {DomainRouter} from './controller/DomainController';
 import {ActionRouter} from './controller/ActionController';
+import {createServer} from 'http';
+import {Server} from 'socket.io';
 
 dotenv.config();
 
@@ -66,6 +68,9 @@ createConnection({
   ActionManager.reload();
 
   const app = express();
+  const server = createServer(app);
+
+  const io = new Server(server);
 
   app.use(express.json());
   app.use(express.urlencoded({extended: true}));
@@ -85,7 +90,35 @@ createConnection({
     res.sendFile(path.join(__dirname, '..', 'front', 'build', 'index.html'));
   });
 
-  app.listen(process.env.HTTP_PORT ?? 3000, () => {
+
+  io.use((socket, next) => {
+    passport.authorize('basic', (err, user, info) => {
+      if (err) {
+        return next(err);
+      }
+      if (user) {
+        socket.data.user = user;
+        return next();
+      }
+      const {token} = socket.handshake.auth;
+      if (!token) {
+        return next(new Error('Unauthorized'));
+      }
+      AccessToken.findOne(token).then(t => {
+        socket.data.user = t?.token;
+        next(t != null ? null : new Error('Invalid token'));
+      }).catch(e => {
+        next(e);
+        console.log(e);
+      });
+    })(socket.request);
+  });
+
+  mailEvent.on('newMail', mail => {
+    io.emit('mail', mail);
+  });
+
+  server.listen(process.env.HTTP_PORT ?? 3000, () => {
     console.log(`Express server has started on port ${process.env.HTTP_PORT ?? 3000}`);
   });
 
