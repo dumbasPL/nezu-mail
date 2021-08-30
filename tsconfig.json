@@ -3,7 +3,8 @@
       "lib": [
          "es5",
          "es6",
-         "ES2016"
+         "ES2016",
+         "ES2018"
       ],
       "target": "es5",
       "module": "commonjs",
@@ -12,5 +13,8 @@
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
       "sourceMap": true
-   }
+   },
+   "include": [
+      "src/**/*"
+   ]
 }

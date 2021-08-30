@@ -1,12 +1,12 @@
 import {Request, Router} from 'express';
-import {authorize} from 'passport';
+import * as passport from 'passport';
 import {Domain} from '../entity/Domain';
 
 export const DomainRouter = Router();
 
 const authTypes = ['basic'];
 
-DomainRouter.get('/', authorize(authTypes, {session: false}), async (req, res) => {
+DomainRouter.get('/', passport.authorize(authTypes, {session: false}), async (req, res) => {
   try {
     const domains = await Domain.find();
     res.status(200).send(domains.map(x => x.domain));
@@ -15,7 +15,7 @@ DomainRouter.get('/', authorize(authTypes, {session: false}), async (req, res) =
   }
 });
 
-DomainRouter.post('/', authorize(authTypes, {session: false}), async (req: Request<unknown, unknown, { domain: string }>, res) => {
+DomainRouter.post('/', passport.authorize(authTypes, {session: false}), async (req: Request<unknown, unknown, { domain: string }>, res) => {
   try {
     if (!req.body.domain) {
       return res.sendStatus(400);
@@ -31,7 +31,7 @@ DomainRouter.post('/', authorize(authTypes, {session: false}), async (req: Reque
   }
 });
 
-DomainRouter.delete('/:domain', authorize(authTypes, {session: false}), async (req: Request<{ domain: string }, unknown, unknown, unknown>, res) => {
+DomainRouter.delete('/:domain', passport.authorize(authTypes, {session: false}), async (req: Request<{ domain: string }, unknown, unknown, unknown>, res) => {
   try {
     const delRes = await Domain.delete(req.params.domain);
     res.sendStatus(delRes.affected != null && delRes.affected == 0 ? 404 : 200);

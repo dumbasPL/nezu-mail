@@ -1,5 +1,5 @@
 import {Mail} from '../entity/Mail';
-import {authenticate} from 'passport';
+import * as passport from 'passport';
 import {Request, Router} from 'express';
 import {MailEvent} from '../MailEvent';
 
@@ -18,7 +18,7 @@ interface GetMailsQuery {
   search?: string;
 }
 
-mailRouter.get('/', authenticate(authTypes, {session: false}), async (req: Request<unknown, unknown, unknown, GetMailsQuery>, res) => {
+mailRouter.get('/', passport.authenticate(authTypes, {session: false}), async (req: Request<unknown, unknown, unknown, GetMailsQuery>, res) => {
   try {
     const query = Mail.createQueryBuilder('mail');
     query.select([
@@ -65,7 +65,7 @@ interface WaitForMailQuery {
   delete?: string;
 }
 
-mailRouter.get('/wait', authenticate(authTypes, {session: false}), (req: Request<unknown, unknown, unknown, WaitForMailQuery>, res) => {
+mailRouter.get('/wait', passport.authenticate(authTypes, {session: false}), (req: Request<unknown, unknown, unknown, WaitForMailQuery>, res) => {
   const onMail = (mail: Mail) => {
     if (req.query.sender && req.query.sender != mail.sender) {
       return;
@@ -93,7 +93,7 @@ mailRouter.get('/wait', authenticate(authTypes, {session: false}), (req: Request
   }, (req.query.timeout ?? 10) * 1000);
 });
 
-mailRouter.get('/:id', authenticate(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
+mailRouter.get('/:id', passport.authenticate(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
   try {
     const mail = await Mail.findOne(req.params.id);
 
@@ -111,7 +111,7 @@ mailRouter.get('/:id', authenticate(authTypes, {session: false}), async (req: Re
   }
 });
 
-mailRouter.delete('/:id', authenticate(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
+mailRouter.delete('/:id', passport.authenticate(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
   try {
     const delRes = await Mail.delete(req.params.id);
 

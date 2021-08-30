@@ -1,13 +1,13 @@
 import {randomBytes} from 'crypto';
 import {Request, Router} from 'express';
-import {authorize} from 'passport';
+import * as passport from 'passport';
 import {AccessToken} from '../entity/AccessToken';
 
 export const AccessTokenRouter = Router();
 
 const authTypes = ['basic'];
 
-AccessTokenRouter.get('/', authorize(authTypes, {session: false}), async (req, res) => {
+AccessTokenRouter.get('/', passport.authorize(authTypes, {session: false}), async (req, res) => {
   try {
     const tokens = await AccessToken.find();
     res.status(200).send(tokens);
@@ -16,7 +16,7 @@ AccessTokenRouter.get('/', authorize(authTypes, {session: false}), async (req, r
   }
 });
 
-AccessTokenRouter.post('/', authorize(authTypes, {session: false}), async (req: Request<unknown, unknown, { name: string }>, res) => {
+AccessTokenRouter.post('/', passport.authorize(authTypes, {session: false}), async (req: Request<unknown, unknown, { name: string }>, res) => {
   try {
     if (!req.body.name) {
       return res.sendStatus(400);
@@ -35,7 +35,7 @@ AccessTokenRouter.post('/', authorize(authTypes, {session: false}), async (req: 
   }
 });
 
-AccessTokenRouter.delete('/:token', authorize(authTypes, {session: false}), async (req: Request<{ token: string }, unknown, unknown, unknown>, res) => {
+AccessTokenRouter.delete('/:token', passport.authorize(authTypes, {session: false}), async (req: Request<{ token: string }, unknown, unknown, unknown>, res) => {
   try {
     const delRes = await AccessToken.delete(req.params.token);
     res.sendStatus(delRes.affected != null && delRes.affected == 0 ? 404 : 200);

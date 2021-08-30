@@ -1,5 +1,5 @@
 import {Request, Router} from 'express';
-import {authorize} from 'passport';
+import * as passport from 'passport';
 import {ActionManager} from '../ActionManager';
 import {Action} from '../entity/Action';
 import {DeleteAction} from '../entity/actions/DeleteAction';
@@ -11,7 +11,7 @@ export const ActionRouter = Router();
 
 const authTypes = ['basic'];
 
-ActionRouter.get('/', authorize(authTypes, {session: false}), async (req, res) => {
+ActionRouter.get('/', passport.authorize(authTypes, {session: false}), async (req, res) => {
   try {
     const actions = await Action.find();
     res.status(200).send(actions);
@@ -20,7 +20,7 @@ ActionRouter.get('/', authorize(authTypes, {session: false}), async (req, res) =
   }
 });
 
-ActionRouter.post('/', authorize(authTypes, {session: false}), async (req, res) => {
+ActionRouter.post('/', passport.authorize(authTypes, {session: false}), async (req, res) => {
   try {
     let action: Action;
     switch (req.body.className) {
@@ -79,7 +79,7 @@ ActionRouter.post('/', authorize(authTypes, {session: false}), async (req, res) 
   }
 });
 
-ActionRouter.delete('/:id', authorize(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
+ActionRouter.delete('/:id', passport.authorize(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
   try {
     const delRes = await Action.delete(req.params.id);
     ActionManager.reload();

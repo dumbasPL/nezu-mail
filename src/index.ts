@@ -10,7 +10,6 @@ import {BasicStrategy} from 'passport-http';
 import {Mail} from './entity/Mail';
 import {AccessToken} from './entity/AccessToken';
 import * as path from 'path';
-import {authenticate} from 'passport';
 import {ActionManager} from './ActionManager';
 import {Domain} from './entity/Domain';
 import {mailEvent, mailRouter} from './controller/MailController';
@@ -57,9 +56,8 @@ createConnection({
   synchronize: process.env.NODE_ENV == 'development',
   logging: false,
   charset: 'utf8mb4',
-  entities: ['src/entity/**/*.ts'],
-  migrations: ['src/migration/**/*.ts'],
-  subscribers: ['src/subscriber/**/*.ts'],
+  entities: [path.join(__dirname, 'entity', '**', '*.{ts,js}')],
+  migrations: [path.join(__dirname, 'migration', '**', '*.{ts,js}')],
 }).then(async connection => {
   if (process.env.NODE_ENV != 'development') {
     await connection.runMigrations();
@@ -84,15 +82,14 @@ createConnection({
 
   app.use('/api/*', (req, res, next) => res.sendStatus(404));
 
-  app.use('/', authenticate('basic', {session: false}), express.static(path.join(__dirname, '..', 'front', 'build')));
+  app.use('/', passport.authenticate('basic', {session: false}), express.static(path.join(__dirname, '..', 'front', 'build')));
 
-  app.get('*', authenticate('basic', {session: false}), (req, res) =>{
+  app.get('*', passport.authenticate('basic', {session: false}), (req, res) =>{
     res.sendFile(path.join(__dirname, '..', 'front', 'build', 'index.html'));
   });
 
-
   io.use((socket, next) => {
-    passport.authorize('basic', (err, user, info) => {
+    passport.authenticate('basic', (err, user, info) => {
       if (err) {
         return next(err);
       }
