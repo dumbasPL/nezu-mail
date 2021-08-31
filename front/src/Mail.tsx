@@ -74,7 +74,7 @@ export default class Mail extends Component<RouteComponentProps<RouteParams>, IS
         <ErrorMessage message={this.state.error} />
         <Row className="py-4 fs-4 justify-content-between" xs="auto">
           <Col>
-            <strong>{this.state.mail.subject}</strong>
+            <strong>{this.state.mail.subject.trim().length === 0 ? '(No subject)' : this.state.mail.subject}</strong>
           </Col>
           <Col>
             <Button variant="danger" onClick={this.deleteMail}>Delete</Button>

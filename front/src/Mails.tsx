@@ -150,7 +150,7 @@ export default class Mails extends Component<RouteComponentProps, IState> {
                   <td>{moment(mail.date).fromNow()}</td>
                   <td>
                   <Link to={`/mail/${mail.id}`}>
-                    {mail.subject}
+                    {mail.subject.trim().length === 0 ? '(No subject)' : mail.subject} 
                   </Link>
                   </td>
                   <td>{mail.sender}</td>
