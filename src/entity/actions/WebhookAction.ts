@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {ChildEntity, Column} from 'typeorm';
+import {ChildEntity, Column, getConnection} from 'typeorm';
 import {getUrl} from '../../Util';
 import {Action} from '../Action';
 import {Mail} from '../Mail';
@@ -19,14 +19,16 @@ export class WebhookAction extends Action {
       action: this
     }, {
       headers: {'User-Agent': 'NezuMail'}
-    }).then(() => {
-      if (this.lastError != this.lastError) {
-        this.lastError = null;
-        this.save();
+    }).then(async () => {
+      if (this.lastError != null) {
+        await getConnection().createQueryBuilder().update(Action).set({
+          lastError: null
+        }).where('id = :id', {id: this.id}).execute();
       }
-    }).catch(e => {
-      this.lastError = e.massage ?? e;
-      this.save();
+    }).catch(async e => {
+      await getConnection().createQueryBuilder().update(Action).set({
+        lastError: e.massage ?? e.toString()
+      }).where('id = :id', {id: this.id}).execute();
     });
     return true;
   }
