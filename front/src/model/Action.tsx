@@ -16,6 +16,8 @@ export abstract class Action {
 
   priority!: number;
 
+  active!: boolean;
+
   className!: string;
 
 }

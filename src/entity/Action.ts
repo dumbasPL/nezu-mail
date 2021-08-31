@@ -37,6 +37,11 @@ export abstract class Action extends BaseEntity {
   @Column()
   priority: number;
 
+  @Column({
+    default: true
+  })
+  active: boolean;
+
   abstract className: string;
 
   private senderRegex?: RegExp;

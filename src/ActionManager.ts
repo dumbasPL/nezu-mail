@@ -12,7 +12,7 @@ export class ActionManager {
 
   static run(mail: Mail): boolean {
     for (const action of this.actions) {
-      if (action.match(mail) && !action.execute(mail)) {
+      if (action.active && action.match(mail) && !action.execute(mail)) {
         return false;
       }
     }

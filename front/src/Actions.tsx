@@ -116,6 +116,21 @@ export default class Actions extends Component<unknown, IState> {
     });
   }
 
+  setActive = (action: Action, newState: boolean) => {
+    const oldState = action.active;
+    this.setState({
+      actions: this.state.actions.map(a => {if (a.id === action.id) { a.active = newState; } return a;})
+    });
+    axios.post('/api/action/' + action.id, {
+      active: newState
+    }).catch(e => {
+      console.log(e);
+      this.setState({
+        actions: this.state.actions.map(a => {if (a.id === action.id) { a.active = oldState; } return a;})
+      });
+    });
+  }
+
   getCondition = (name: string, value?: string) => value ? <>{name}: <strong>{value}</strong><br/></> : null
 
   render() {
@@ -135,6 +150,7 @@ export default class Actions extends Component<unknown, IState> {
           <Table className="actions-table">
             <thead>
               <tr>
+                <th style={{width: '1px'}}>active</th>
                 <th>name</th>
                 <th>type</th>
                 <th>condition(s)</th>
@@ -146,6 +162,9 @@ export default class Actions extends Component<unknown, IState> {
               {this.state.actions?.map(action => {
                 return (
                   <tr key={i++}>
+                    <td>
+                      <Form.Check type="checkbox" checked={action.active} onChange={(e) => this.setActive(action, e.target.checked)}/>
+                    </td>
                     <td>{action.name}</td>
                     <td>{action.className}</td>
                     <td>
@@ -156,8 +175,8 @@ export default class Actions extends Component<unknown, IState> {
                     </td>
                     <td>{action.priority}</td>
                     <td>
-                      <Button variant="primary" onClick={() => this.openDetailsModal(action)}>Show</Button>
-                      <Button variant="danger" onClick={() => this.deleteAction(action.id)} className="ms-1">Delete</Button>
+                      <Button size="sm" variant="primary" onClick={() => this.openDetailsModal(action)}>Show</Button>
+                      <Button size="sm" variant="danger" onClick={() => this.deleteAction(action.id)} className="ms-1">Delete</Button>
                     </td>
                   </tr>
                 );
@@ -167,19 +186,20 @@ export default class Actions extends Component<unknown, IState> {
         </Container>
         <Modal show={this.state.showDetailsModal} onHide={this.closeDetailsModal}>
           <Modal.Header closeButton>{this.state.curAction?.name}</Modal.Header>
-          <Modal.Body>
+          <Modal.Body style={{overflowWrap: 'break-word'}}>
             <p>Inbox regex: <strong>{this.state.curAction?.inbox ?? '*'}</strong></p>
             <p>Sender regex: <strong>{this.state.curAction?.sender ?? '*'}</strong></p>
             <p>Subject regex: <strong>{this.state.curAction?.subject ?? '*'}</strong></p>
             <p>Action priority: <strong>{this.state.curAction?.priority}</strong></p>
             <p>Action type: <strong>{this.state.curAction?.className}</strong></p>
             {getActionOptions(this.state.curAction ?? '')}
+            <p>Last error: <strong>{this.state.curAction?.lastError ?? '-'}</strong></p>
           </Modal.Body>
         </Modal>
         <Modal show={this.state.showAddModal} onHide={this.closeAddModal}>
           <Form ref={this.actionForm} onSubmit={this.handleSubmit}>
             <Modal.Header closeButton>
-              <Modal.Title>Add new domain</Modal.Title>
+              <Modal.Title>Add new action</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Form.Group>

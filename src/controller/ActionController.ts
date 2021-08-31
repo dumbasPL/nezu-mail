@@ -79,6 +79,46 @@ ActionRouter.post('/', passport.authorize(authTypes, {session: false}), async (r
   }
 });
 
+ActionRouter.post('/:id', passport.authorize(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, any, unknown>, res) => {
+  try {
+    const action = await Action.findOne(req.params.id);
+    if (!action) {
+      return res.status(404).send('Action not found');
+    }
+    let {name, sender, inbox, subject, active} = req.body;
+
+    if (typeof name == 'string') {
+      name = name.trim();
+      if (name.length == 0) {
+        return res.status(400).send('name can not be empty');
+      }
+      action.name = name;
+    }
+
+    if (typeof sender == 'string') {
+      action.sender = sender.trim();
+    }
+
+    if (typeof inbox == 'string') {
+      action.inbox = inbox.trim();
+    }
+
+    if (typeof subject == 'string') {
+      action.subject = subject.trim();
+    }
+
+    if (typeof active == 'boolean') {
+      action.active = active;
+    }
+
+    await action.save();
+    ActionManager.reload();
+    res.sendStatus(200);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
 ActionRouter.delete('/:id', passport.authorize(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
   try {
     const delRes = await Action.delete(req.params.id);
