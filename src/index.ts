@@ -1,6 +1,6 @@
-import * as dotenv from 'dotenv';
+import 'dotenv/config';
 import 'reflect-metadata';
-import {createConnection} from 'typeorm';
+import {DataSource} from 'typeorm';
 import * as express from 'express';
 import {SMTPServer} from 'smtp-server';
 import {simpleParser} from 'mailparser';
@@ -19,8 +19,6 @@ import {ActionRouter} from './controller/ActionController';
 import {createServer} from 'http';
 import {Server} from 'socket.io';
 
-dotenv.config();
-
 // basic auth
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
@@ -37,7 +35,7 @@ passport.use(
 // token auth
 passport.use(
   new BearerStrategy((token, done) => {
-    AccessToken.findOne(token).then(t => {
+    AccessToken.findOneBy({token}).then(t => {
       done(null, t ?? false);
     }).catch(e => {
       done(e.message);
@@ -46,21 +44,22 @@ passport.use(
   })
 );
 
-createConnection({
-  type: 'mysql',
+const AppDataSource = new DataSource({
+  type: 'mariadb',
   host: process.env.MYSQL_HOST || 'localhost',
   port: process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT) : 3306,
   username: process.env.MYSQL_USER || 'test',
   password: process.env.MYSQL_PASSWORD || 'test',
   database: process.env.MYSQL_DATABASE || 'test',
-  synchronize: process.env.NODE_ENV == 'development',
+  synchronize: false, // process.env.NODE_ENV == 'development',
   logging: false,
-  charset: 'utf8mb4',
   entities: [path.join(__dirname, 'entity', '**', '*.{ts,js}')],
   migrations: [path.join(__dirname, 'migration', '**', '*.{ts,js}')],
-}).then(async connection => {
+});
+
+AppDataSource.initialize().then(async dataSource => {
   if (process.env.NODE_ENV != 'development') {
-    const migrations = await connection.runMigrations({transaction: 'all'});
+    const migrations = await dataSource.runMigrations({transaction: 'all'});
     console.log(`Executed ${migrations.length} migrations`);
   }
 
@@ -139,7 +138,7 @@ createConnection({
           mail.body = parsed.html || parsed.text || '';
 
           const domain = mail.inbox.substring(mail.inbox.lastIndexOf('@') + 1);
-          if (await Domain.findOne({domain})) {
+          if (await Domain.findOneBy({domain})) {
             mail = await mail.save();
             console.log(`New Mail: ${mail.sender} -> ${mail.inbox}: ${mail.subject}`);
             if (ActionManager.run(mail)) {

@@ -95,7 +95,7 @@ mailRouter.get('/wait', passport.authenticate(authTypes, {session: false}), (req
 
 mailRouter.get('/:id', passport.authenticate(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, unknown, unknown>, res) => {
   try {
-    const mail = await Mail.findOne(req.params.id);
+    const mail = await Mail.findOneBy({id: req.params.id});
 
     if (mail) {
       if (req.accepts('html')) {

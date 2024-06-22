@@ -4,6 +4,6 @@ import {BaseEntity, Entity, PrimaryColumn} from 'typeorm';
 export class Domain extends BaseEntity {
 
   @PrimaryColumn()
-  domain: string;
+    domain: string;
 
 }

@@ -6,43 +6,43 @@ import {Mail} from './Mail';
   id: 'DESC'
 }})
 @TableInheritance({column: {type: 'varchar', name: 'type'}})
-export abstract class Action extends BaseEntity {
+export class Action extends BaseEntity {
 
   @PrimaryGeneratedColumn()
-  id: number;
+    id: number;
 
   @Column()
-  name: string;
+    name: string;
 
   @Column({
     nullable: true,
   })
-  sender?: string;
+    sender?: string;
 
   @Column({
     nullable: true,
   })
-  inbox?: string;
+    inbox?: string;
 
   @Column({
     nullable: true,
   })
-  subject?: string;
+    subject?: string;
 
   @Column({
     nullable: true,
   })
-  lastError?: string;
+    lastError?: string;
 
   @Column()
-  priority: number;
+    priority: number;
 
   @Column({
     default: true
   })
-  active: boolean;
+    active: boolean;
 
-  abstract className: string;
+  className: string;
 
   private senderRegex?: RegExp;
 
@@ -50,7 +50,9 @@ export abstract class Action extends BaseEntity {
 
   private subjectRegex?: RegExp;
 
-  abstract execute(mail : Mail): boolean;
+  execute(mail : Mail): boolean {
+    throw new Error('Attempted to execute abstract action');
+  }
 
   match(mail: Mail) {
     if (!this.senderRegex && this.sender && this.sender.length > 0) {

@@ -8,10 +8,10 @@ export class ReplaceAction extends Action {
   className: string = 'ReplaceAction';
 
   @Column()
-  regex: string;
+    regex: string;
 
   @Column()
-  replacement: string;
+    replacement: string;
 
   private compiledRegex?: RegExp;
 

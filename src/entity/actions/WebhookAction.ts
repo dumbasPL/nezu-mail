@@ -10,7 +10,7 @@ export class WebhookAction extends Action {
   className: string = 'WebhookAction';
 
   @Column()
-  webhookUrl: string;
+    webhookUrl: string;
 
   execute(mail: Mail): boolean {
     axios.post(this.webhookUrl, {

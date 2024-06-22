@@ -81,7 +81,7 @@ ActionRouter.post('/', passport.authorize(authTypes, {session: false}), async (r
 
 ActionRouter.post('/:id', passport.authorize(authTypes, {session: false}), async (req: Request<{ id: number }, unknown, any, unknown>, res) => {
   try {
-    const action = await Action.findOne(req.params.id);
+    const action = await Action.findOneBy({id: req.params.id});
     if (!action) {
       return res.status(404).send('Action not found');
     }

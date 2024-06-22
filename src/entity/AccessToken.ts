@@ -6,9 +6,9 @@ export class AccessToken extends BaseEntity {
   @PrimaryColumn({
     length: 32,
   })
-  token: string;
+    token: string;
 
   @Column()
-  name: string;
+    name: string;
 
 }

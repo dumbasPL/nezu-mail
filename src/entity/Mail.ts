@@ -3,22 +3,22 @@ import {Entity, PrimaryGeneratedColumn, Column, BaseEntity} from 'typeorm';
 @Entity()
 export class Mail extends BaseEntity {
 
-    @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+  @Column()
     sender: string;
 
-    @Column()
+  @Column()
     inbox: string;
 
-    @Column()
+  @Column()
     subject: string;
 
-    @Column()
+  @Column()
     date: Date;
 
-    @Column('longtext')
+  @Column('longtext')
     body: string;
 
 }

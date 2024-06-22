@@ -10,7 +10,7 @@ export class DiscordWebhookAction extends Action {
   className: string = 'DiscordWebhookAction';
 
   @Column()
-  webhookUrl: string;
+    webhookUrl: string;
 
   execute(mail: Mail): boolean {
     axios.post(this.webhookUrl, {

@@ -6,7 +6,7 @@ export class ActionManager {
   static actions: Action[];
 
   static async reload() {
-    this.actions = await Action.find();
+    this.actions = await Action.findBy({});
     console.log(`${this.actions.length} action(s) loaded`);
   }
 
