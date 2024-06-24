@@ -1,18 +1,28 @@
-FROM node:14-alpine as build
+FROM node:lts-alpine as build-api
 
 WORKDIR /builder
 
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
-COPY front/package*.json ./front/
-
-RUN npm install && cd ./front && npm install
+RUN npm ci
 
 COPY . .
 
-RUN npm run build && cd ./front && npm run build
+RUN npm run build
 
-FROM node:14-alpine
+FROM node:lts-alpine as build-front
+
+WORKDIR /builder
+
+COPY front/package.json front/package-lock.json ./
+
+RUN npm ci
+
+COPY front .
+
+RUN npm run build
+
+FROM node:lts-alpine
 
 ENV NODE_ENV=production
 ENV HTTP_PORT=3000
@@ -20,12 +30,12 @@ ENV SMTP_PORT=25
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
 RUN npm ci
 
-COPY --from=build /builder/build ./build
-COPY --from=build /builder/front/build ./front/build
+COPY --from=build-api /builder/build ./build
+COPY --from=build-front /builder/dist ./front/dist
 
 EXPOSE ${HTTP_PORT} ${SMTP_PORT}
 

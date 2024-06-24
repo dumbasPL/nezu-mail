@@ -18,13 +18,15 @@ import {DomainRouter} from './controller/DomainController';
 import {ActionRouter} from './controller/ActionController';
 import {createServer} from 'http';
 import {Server} from 'socket.io';
+import * as session from 'express-session';
+import {randomBytes} from 'crypto';
 
 // basic auth
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 passport.use(
   new BasicStrategy((username, password, done) => {
-    if (username != process.env.ADMIN_USER || password != process.env.ADMIN_PASSWORD) {
+    if (username !== process.env.ADMIN_USER || password !== process.env.ADMIN_PASSWORD) {
       done(null, false);
     } else {
       done(null, username);
@@ -72,6 +74,11 @@ AppDataSource.initialize().then(async dataSource => {
 
   app.use(express.json());
   app.use(express.urlencoded({extended: true}));
+  app.use(session({
+    secret: randomBytes(20).toString('hex'),
+    resave: false,
+    saveUninitialized: false,
+  }));
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -82,11 +89,10 @@ AppDataSource.initialize().then(async dataSource => {
 
   app.use('/api/*', (req, res, next) => res.sendStatus(404));
 
-  app.use('/', passport.authenticate('basic', {session: false}), express.static(path.join(__dirname, '..', 'front', 'build')));
+  const staticPath = path.join(__dirname, '..', 'front', 'dist');
 
-  app.get('*', passport.authenticate('basic', {session: false}), (req, res) =>{
-    res.sendFile(path.join(__dirname, '..', 'front', 'build', 'index.html'));
-  });
+  app.use('/', passport.authenticate('basic', {session: false}), express.static(staticPath));
+  app.get('*', passport.authenticate('basic', {session: false}), (req, res) => res.sendFile(path.join(staticPath, 'index.html')));
 
   io.use((socket, next) => {
     passport.authenticate('basic', (err, user, info) => {

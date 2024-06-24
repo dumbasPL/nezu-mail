@@ -1,0 +1,34 @@
+$font-family-sans-serif: "Roboto", "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+$font-size-base: 1.2rem;
+
+$primary: #550d88;
+
+$body-bg-dark: #1c1f20;
+
+// $body-color-dark: #c8c3bc;
+// $link-color-dark: #b35cef;
+
+// $border-color-dark: rgb(60, 65, 68);
+
+// $input-bg: rgb(24, 26, 27);
+// $input-color: rgb(200, 195, 188);
+// $input-border-color: rgb(60, 65, 68);
+// $table-border-color: rgb(56, 61, 63);
+// $pagination-bg: rgb(24, 26, 27);
+// $pagination-border-color: rgb(56, 61, 63);
+// $pagination-disabled-bg: rgb(24, 26, 27);
+// $pagination-disabled-border-color: $pagination-border-color;
+
+// $modal-content-bg: $body-bg;
+// $btn-close-color: white;
+
+// $form-check-input-bg: white;
+
+@import "node_modules/bootstrap/scss/bootstrap";
+
+a {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}

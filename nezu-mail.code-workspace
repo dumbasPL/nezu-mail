@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "front"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"front/": true,
+		}
+	}
+}
