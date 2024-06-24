@@ -12,7 +12,7 @@ import Table from "react-bootstrap/Table";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
-const PER_PAGE = 2;
+const PER_PAGE = 25;
 
 export default function Mails() {
   const [searchParams, setSearchParams] = useSearchParams();
