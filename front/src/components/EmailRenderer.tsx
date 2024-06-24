@@ -1,5 +1,5 @@
 import DOMPurify from "dompurify";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 const purify = DOMPurify();
 
@@ -10,19 +10,30 @@ purify.addHook('afterSanitizeAttributes', node => {
   }
 })
 
+purify.addHook('uponSanitizeElement', (node, data) => {
+  if (data.tagName === 'style') {
+    node.textContent = node.textContent?.replace(/</g, '\\003c ') ?? null;
+  }
+});
+
 export default function EmailRenderer(props: {
   body: string;
 }) {
-  const html = useMemo(() => purify.sanitize(props.body), [props.body]);
+  const html = useMemo(() => {
+    const html = purify.sanitize(props.body, {FORCE_BODY: true});
+    return '<style>:host { all: initial; display: block; background: white; }</style>' + html;
+  }, [props.body]);
 
-  // restrict the size of the email body
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      const root = import.meta.env.DEV ? ref.current : ref.current.attachShadow({ mode: 'open' });
+      root.innerHTML = html;
+    }
+  }, [html]);
+
   return (
-    <div
-      style={{
-        minHeight: '10rem',
-      }}
-      className="bg-light text-dark w-100 border"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    <div style={{minHeight: '10rem'}} className="w-100 border" ref={ref} />
   );
 }

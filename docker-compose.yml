@@ -8,7 +8,7 @@ services:
       MARIADB_PASSWORD: "test"
       MARIADB_DATABASE: "test"
       MARIADB_ROOT_PASSWORD: "admin"
-  phpmyadmin:
+  adminer:
     image: adminer
     depends_on:
       - db
@@ -16,3 +16,10 @@ services:
       ADMINER_DEFAULT_SERVER: db
     ports:
       - 8888:8080
+  phpmyadmin:
+    image: phpmyadmin
+    ports:
+      - 8889:80
+    environment:
+      - PMA_HOST=db
+      - UPLOAD_LIMIT=300M

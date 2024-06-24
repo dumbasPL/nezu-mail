@@ -26,11 +26,17 @@ export default function Mails() {
   const search = searchParams.get('search') ?? undefined;
   const page = parseInt(searchParams.get('page') ?? '') || 0;
 
-  const setParam = (key: string, value: string) => {
-    setSearchParams({
+  const setParams = (params: Record<string, string>) => {
+    const newParams = {
       ...Object.fromEntries(searchParams),
-      [key]: value,
-    });
+      ...params,
+    };
+    for (const key in newParams) {
+      if (newParams[key] == null || newParams[key] === '') {
+        delete newParams[key];
+      }
+    }
+    setSearchParams(newParams);
   }
 
   const { error, data: emails, isFetching } = useQuery({
@@ -83,7 +89,7 @@ export default function Mails() {
         mailCount={emails?.total ?? 0}
         connected={isConnected}
         loading={isFetching}
-        onSearch={value => setParam('search', value)}
+        onSearch={search => setParams({search, page: '0'})}
       />
 
       <Table>
@@ -118,7 +124,7 @@ export default function Mails() {
           <Pagination
             total={emails?.total ?? 0}
             curPage={page}
-            onClick={page => setParam('page', page.toString())}
+            onClick={page => setParams({page: page.toString()})}
             perPage={PER_PAGE}
           />
         </Col>
